@@ -47,3 +47,4 @@ yarn-error.log*
 
 # 🧪 Docker (si más adelante usas)
 docker-compose.override.yml
+.vercel
