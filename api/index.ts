@@ -7,6 +7,6 @@ import { initializeDataSource } from "../src/config/data-source.js";
 const handler = serverless(app);
 
 export default async (req: VercelRequest, res: VercelResponse) => {
-  await initializeDataSource(); // inicializa conexión solo una vez por invocación
+  await initializeDataSource();
   return handler(req, res);
 };
