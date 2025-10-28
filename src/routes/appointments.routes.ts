@@ -4,10 +4,9 @@ import { get } from "http";
 
 const router = Router();
 
-router.get("/", getAllappointments);
-router.get("/pet/:idPet", getAppointmentsByPetId);
-router.delete("/:idAppointment", deleteAppointmentById);
-router.post("/", createAppointment);
-router.get("/", getAllappointments);
+router.get("/getAllappointments", getAllappointments);
+router.get("/getAppointmentsByPetId/:idPet", getAppointmentsByPetId);
+router.delete("/deleteAppointmentById/:idAppointment", deleteAppointmentById);
+router.post("/createAppointment", createAppointment);
 
 export default router;
