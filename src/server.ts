@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
 import { initializeDataSource } from "./config/data-source.js";
-import app from "./app";
+import app from "./app.js";
 
 dotenv.config();
 
@@ -18,3 +18,5 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export default app;
+
+//falta el endpoint para enrutar a la api de rendel

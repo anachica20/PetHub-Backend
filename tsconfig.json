@@ -46,5 +46,5 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   },
-  "include": ["src"]
+  "include": ["src", "src/server.ts"]
 }
