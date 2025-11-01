@@ -1,8 +1,6 @@
 import { AppDataSource } from "../config/data-source";
 import { PetRepository } from "../repositories/pets.repository";
 import { Pet } from "../entities/pet.entity";
-import { createPet } from "../controllers/pets.controller";
-import { createNewPet } from "../interfaces/pets.interface";
 
 export class PetsService {
 
@@ -44,27 +42,27 @@ export class PetsService {
     }
 }
 
-static async createPet(data: createNewPet) {
-    const petRepo = AppDataSource.getRepository(Pet);
-    const userRepo = AppDataSource.getRepository(User);
+// static async createPet(data: createNewPet) {
+//     const petRepo = AppDataSource.getRepository(Pet);
+//     const userRepo = AppDataSource.getRepository(User);
 
-    // Buscar el dueño
-    const owner = await userRepo.findOne({ where: { idUser: data.ownerId } });
-    if (!owner) {
-      throw new Error("Owner not found");
-    }
+//     // Buscar el dueño
+//     const owner = await userRepo.findOne({ where: { idUser: data.ownerId } });
+//     if (!owner) {
+//       throw new Error("Owner not found");
+//     }
 
-    // Crear la mascota
-    const newPet = petRepo.create({
-      owner,
-      name: data.name,
-      species: data.species,
-      breed: data.breed,
-      birthDate: data.birthDate,
-    });
+//     // Crear la mascota
+//     const newPet = petRepo.create({
+//       owner,
+//       name: data.name,
+//       species: data.species,
+//       breed: data.breed,
+//       birthDate: data.birthDate,
+//     });
 
-    // Guardar en la base de datos
-    const savedPet = await petRepo.save(newPet);
+//     // Guardar en la base de datos
+//     const savedPet = await petRepo.save(newPet);
 
-    return savedPet;
-  }
+//     return savedPet;
+//   }

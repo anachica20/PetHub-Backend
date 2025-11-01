@@ -29,21 +29,21 @@ export const getPetById = async (req: Request, res: Response) => {
   }
 };
 
-export const createPet = async (req: Request, res: Response) => {
-  try {
-    const petData: CreatePet = req.body;
+// export const createPet = async (req: Request, res: Response) => {
+//   try {
+//     const petData: CreatePet = req.body;
 
-    // Validaciones mínimas
-    if (!petData.ownerId || !petData.name || !petData.species) {
-      return res.status(400).json({
-        message: "Missing required fields: ownerId, name, and species are mandatory",
-      });
-    }
+//     // Validaciones mínimas
+//     if (!petData.ownerId || !petData.name || !petData.species) {
+//       return res.status(400).json({
+//         message: "Missing required fields: ownerId, name, and species are mandatory",
+//       });
+//     }
 
-    const newPet = await PetsService.createPet(petData);
-    return res.status(201).json(newPet);
-  } catch (error: any) {
-    console.error("❌ Error creating pet:", error);
-    return res.status(400).json({ message: error.message });
-  }
-};
+//     const newPet = await PetsService.createPet(petData);
+//     return res.status(201).json(newPet);
+//   } catch (error: any) {
+//     console.error("❌ Error creating pet:", error);
+//     return res.status(400).json({ message: error.message });
+//   }
+// };
