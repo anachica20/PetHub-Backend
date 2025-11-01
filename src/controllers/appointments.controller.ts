@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { AppointmentsService } from "../services/appointments.service";
 
-export const getAllappointments = async (_req: Request, res: Response) => {
+export const getAllappointments = async (_req: Request, res: Response) => {   
     try {
         let response = await AppointmentsService.getAllappointments();
         res.json(response);
@@ -10,7 +10,7 @@ export const getAllappointments = async (_req: Request, res: Response) => {
     }
 }
 
-export const getAppointmentsByPetId = async (_req: Request, res: Response) => {
+export const getAppointmentsByPetId = async (_req: Request, res: Response) => {   
     try {
         const { idPet } = _req.params;
         const petId = Number(idPet);

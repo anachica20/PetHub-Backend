@@ -24,4 +24,7 @@ export const AppointmentRepository = AppDataSource.getRepository(Appointment).ex
     return this.delete({ idAppointment });
   },
 
+  //crear repository para todas las citas 
+
+
 });

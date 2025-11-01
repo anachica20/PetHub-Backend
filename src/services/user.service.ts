@@ -4,6 +4,7 @@ import { Role } from "../entities/role.entity.js";
 import bcrypt from "bcrypt";
 
 export class UserService {
+
   static async createUser({
     fullName,
     email,
@@ -43,5 +44,39 @@ export class UserService {
 
     await userRepo.save(newUser);
     return newUser;
+  }
+
+  static async getUserById(id: number) {
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { idUser: id }, relations: ["role"] });
+        if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  }
+
+  static async getAllUsers() {
+    const userRepo = AppDataSource.getRepository(User);
+    const users = await userRepo.find({
+      relations: ["role"], // incluir la relación con Role si aplica
+    });
+
+    if (!users || users.length === 0) {
+      throw new Error("No users found");
+    }
+
+    return users;
+  }
+
+  static async deleteUserById(id: number) {
+    const userRepo = AppDataSource.getRepository(User);
+
+    const user = await userRepo.findOne({ where: { idUser: id } });
+    if (!user) {
+      return false; // No existe
+    }
+
+    await userRepo.remove(user); // o delete({ idUser: id }) si prefieres
+    return true;
   }
 }

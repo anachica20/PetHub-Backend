@@ -8,8 +8,9 @@ import { CreateAppointmentDto, AppointmentResponse } from "../interfaces/appoint
 export class AppointmentsService {
 
   static async getAllappointments(): Promise<AppointmentResponse[]> {
-    const appointments = await AppointmentRepository.find();
-
+  const appointments = await AppointmentRepository.find({
+    relations: ["pet", "owner", "veterinarian"],
+  });
     // Mapeamos los resultados para no devolver objetos enteros
     return appointments.map(a => ({
       idAppointment: a.idAppointment,
