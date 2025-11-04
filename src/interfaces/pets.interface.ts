@@ -2,6 +2,7 @@ export interface createNewPet {
   idPet?: number;
   name: string;
   species: string;
-  breed?: string;
+  breed: string;
   birthDate?: Date;
+  ownerId: number;
 }
