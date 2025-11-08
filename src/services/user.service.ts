@@ -1,6 +1,7 @@
 import { AppDataSource } from "../config/data-source.js";
 import { User } from "../entities/user.entity.js";
 import { Role } from "../entities/role.entity.js";
+import { UpdateUserDto } from "../interfaces/users.interface.js";
 import bcrypt from "bcrypt";
 
 export class UserService {
@@ -49,7 +50,7 @@ export class UserService {
   static async getUserById(id: number) {
     const userRepo = AppDataSource.getRepository(User);
     const user = await userRepo.findOne({ where: { idUser: id }, relations: ["role"] });
-        if (!user) {
+    if (!user) {
       throw new Error("User not found");
     }
     return user;
@@ -79,4 +80,45 @@ export class UserService {
     await userRepo.remove(user); // o delete({ idUser: id }) si prefieres
     return true;
   }
+
+  static async updateUser(idUser: number, data: UpdateUserDto) {
+    const userRepo = AppDataSource.getRepository(User);
+    const roleRepo = AppDataSource.getRepository(Role);
+
+    // 1️⃣ Buscar el usuario
+    const user = await userRepo.findOne({
+      where: { idUser },
+      relations: ["role"],
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // 2️⃣ Actualizar nombre si se envía
+    if (data.fullName) {
+      user.fullName = data.fullName.trim();
+    }
+
+    // 3️⃣ Actualizar rol si se envía
+    if (data.roleId) {
+      const newRole = await roleRepo.findOne({ where: { idRole: data.roleId } });
+      if (!newRole) throw new Error("Role not found");
+      user.role = newRole;
+    }
+
+    // 4️⃣ Guardar cambios
+    const savedUser = await userRepo.save(user);
+
+    // 5️⃣ Retornar un objeto limpio
+    return {
+      idUser: savedUser.idUser,
+      fullName: savedUser.fullName,
+      email: savedUser.email,
+      role: savedUser.role.idRole,
+      status: savedUser.status,
+      updatedAt: savedUser.updatedAt,
+    };
+  }
+
 }

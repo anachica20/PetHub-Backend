@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AppointmentsService } from "../services/appointments.service";
+import { CreateAppointmentDto } from "../interfaces/appointment.interface";
 
 export const getAllappointments = async (_req: Request, res: Response) => {   
     try {
@@ -64,5 +65,26 @@ export const createAppointment = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error(error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateAppointment = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.body;
+    const appointmentData: Partial<CreateAppointmentDto & { status?: string }> = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "Missing appointment ID" });
+    }
+
+    const updatedAppointment = await AppointmentsService.updateAppointment(id, appointmentData);
+
+    return res.status(200).json({
+      message: "Appointment updated successfully",
+      appointment: updatedAppointment,
+    });
+  } catch (error: any) {
+    console.error("Error updating appointment:", error);
+    return res.status(500).json({ message: error.message });
   }
 };

@@ -1,7 +1,7 @@
 import { AppDataSource } from "../config/data-source";
 import { PetRepository } from "../repositories/pets.repository";
 import { Pet } from "../entities/pet.entity";
-import { createNewPet } from "../interfaces/pets.interface";
+import { createNewPet, UpdatePetDto } from "../interfaces/pets.interface";
 import { UserRepository } from "../repositories/user.repository";
 import { Repository } from "typeorm";
 
@@ -64,5 +64,37 @@ export class PetsService {
 
         return newPet;
     }
+    
+    static async deletePetById(idPet: number): Promise<void> {
+        const petRepo = AppDataSource.getRepository(Pet);
+
+        const pet = await petRepo.findOne({ where: { idPet } });
+        if (!pet) {
+            throw new Error("Pet not found");
+        }
+
+        await petRepo.remove(pet); // elimina completamente el registro
+    }
+
+
+static async updatePetById(id: number, data: UpdatePetDto) {
+    const petRepo = AppDataSource.getRepository(Pet);
+
+    // 🔍 Buscar la mascota existente
+    const pet = await petRepo.findOne({ where: { idPet: id } });
+    if (!pet) {
+      throw new Error("Pet not found");
+    }
+
+    // 📝 Actualizar solo los campos permitidos
+    if (data.name) pet.name = data.name;
+    if (data.gender) pet.gender = data.gender;
+    if (data.status) pet.status = data.status;
+
+    // 💾 Guardar cambios
+    const updatedPet = await petRepo.save(pet);
+
+    return updatedPet;
+  }
 
 }

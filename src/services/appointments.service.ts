@@ -8,9 +8,9 @@ import { CreateAppointmentDto, AppointmentResponse } from "../interfaces/appoint
 export class AppointmentsService {
 
   static async getAllappointments(): Promise<AppointmentResponse[]> {
-  const appointments = await AppointmentRepository.find({
-    relations: ["pet", "owner", "veterinarian"],
-  });
+    const appointments = await AppointmentRepository.find({
+      relations: ["pet", "owner", "veterinarian"],
+    });
     // Mapeamos los resultados para no devolver objetos enteros
     return appointments.map(a => ({
       idAppointment: a.idAppointment,
@@ -85,4 +85,63 @@ export class AppointmentsService {
     } as AppointmentResponse;
 
   }
+
+  static async updateAppointment(id: number, data: Partial<CreateAppointmentDto & { status?: string }>) {
+    const appointmentRepo = AppDataSource.getRepository(Appointment);
+    const petRepo = AppDataSource.getRepository(Pet);
+    const userRepo = AppDataSource.getRepository(User);
+
+    const appointment = await appointmentRepo.findOne({
+      where: { idAppointment: id },
+      relations: ["pet", "owner", "veterinarian"],
+    });
+
+    if (!appointment) {
+      throw new Error("Appointment not found");
+    }
+
+    // 🔁 Actualizar relaciones si cambian
+    if (data.petId) {
+      const pet = await petRepo.findOne({ where: { idPet: data.petId } });
+      if (!pet) throw new Error("Pet not found");
+      appointment.pet = pet;
+    }
+
+    if (data.ownerId) {
+      const owner = await userRepo.findOne({ where: { idUser: data.ownerId } });
+      if (!owner) throw new Error("Owner not found");
+      appointment.owner = owner;
+    }
+
+    if (data.veterinarianId) {
+      const vet = await userRepo.findOne({ where: { idUser: data.veterinarianId } });
+      if (!vet) throw new Error("Veterinarian not found");
+      appointment.veterinarian = vet;
+    }
+
+    // 📝 Actualizar campos simples
+    if (data.appointmentDate) {
+      // ⚠️ Ajuste de zona horaria: convertir ISO a Date sin desfase
+      appointment.appointmentDate = new Date(data.appointmentDate);
+    }
+
+    if (data.notes !== undefined) appointment.notes = data.notes;
+    if (data.status !== undefined) appointment.status = data.status as any; // ✅ ahora sí se actualiza el estado
+
+    // ✅ Guardar cambios
+    const savedAppointment = await appointmentRepo.save(appointment);
+
+    // 🧾 Retornar la cita actualizada
+    return {
+      idAppointment: savedAppointment.idAppointment,
+      petId: savedAppointment.pet.idPet,
+      ownerId: savedAppointment.owner.idUser,
+      veterinarianId: savedAppointment.veterinarian.idUser,
+      appointmentDate: savedAppointment.appointmentDate,
+      status: savedAppointment.status,
+      notes: savedAppointment.notes ?? null,
+      creationDate: savedAppointment.creationDate,
+    };
+  }
+
 }

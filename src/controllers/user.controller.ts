@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
+import { UpdateUserDto } from "../interfaces/users.interface";
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -14,7 +15,9 @@ const HARDCODED_USER = {
 // Ruta de login
 export const login = async (req: Request, res: Response) => {
   try {
-    console.log('Login request body:', req.body);
+    //console.log('Login request body:', req.body);
+    console.log("Autotización obtenida");
+    
     const { username, password } = req.body;
 
     // Validar que se envíen los datos
@@ -134,7 +137,33 @@ export const deleteUserById = async (req: Request, res: Response) => {
 
     return res.status(200).json({ message: "User deleted successfully" });
   } catch (error: any) {
-    console.error("❌ Error deleting user:", error);
+    console.error("Error deleting user:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { idUser } = req.params;
+    const userData: UpdateUserDto = req.body;
+
+    if (!idUser) {
+      return res.status(400).json({ message: "Missing user ID" });
+    }
+
+    const id = Number(idUser);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "User ID must be a number" });
+    }
+
+    const updatedUser = await UserService.updateUser(id, userData);
+
+    return res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUser,
+    });
+  } catch (error: any) {
+    console.error("Error updating user:", error);
+    return res.status(500).json({ message: error.message });
   }
 };
