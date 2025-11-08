@@ -62,7 +62,6 @@ export const deletePetById = async (req: Request, res: Response) => {
     if (isNaN(idPet)) {
       return res.status(400).json({ message: "Invalid pet ID" });
     }
-
     await PetsService.deletePetById(idPet);
     return res.status(200).json({ message: "Pet deleted successfully" });
   } catch (error: any) {
@@ -76,7 +75,7 @@ export const deletePetById = async (req: Request, res: Response) => {
 
 export const updatePetById = async (req: Request, res: Response) => {
   try {
-    const idParam = req.params.idPet; // viene de la URL /pets/:idPet
+    const idParam = req.params.idPet;
 
     if (!idParam) {
       return res.status(400).json({ message: "Missing pet ID" });

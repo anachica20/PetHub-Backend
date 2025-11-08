@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { UpdateUserDto } from "../interfaces/users.interface";
+
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -123,8 +124,7 @@ export const deleteUserById = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    const userId = parseInt(id); // ← Usamos params, no query
-
+    const userId = parseInt(id);
     if (isNaN(userId)) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
@@ -138,7 +138,8 @@ export const deleteUserById = async (req: Request, res: Response) => {
     return res.status(200).json({ message: "User deleted successfully" });
   } catch (error: any) {
     console.error("Error deleting user:", error);
-    return res.status(500).json({ message: "Internal server error" });
+
+    return res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
 

@@ -7,9 +7,9 @@ const router = Router();
 router.post("/createUser", createUser);
 router.post("/login", login);
 router.get("/getUserById/:id", getUserById);
-router.get("/getAllUsers", getAllUsers); // Example route to get all users
+router.get("/getAllUsers", getAllUsers); 
 router.delete("/deleteUserById/:id", deleteUserById);
-router.put("/updateUser/:idUser", updateUser); // Example route to update user details
+router.put("/updateUser/:idUser", updateUser);
 
 
 

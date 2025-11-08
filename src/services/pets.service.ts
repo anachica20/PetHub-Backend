@@ -1,16 +1,15 @@
-import { AppDataSource } from "../config/data-source";
 import { PetRepository } from "../repositories/pets.repository";
 import { Pet } from "../entities/pet.entity";
 import { createNewPet, UpdatePetDto } from "../interfaces/pets.interface";
 import { UserRepository } from "../repositories/user.repository";
-import { Repository } from "typeorm";
+import { AppointmentRepository } from "../repositories/appointments.repository";
 
 export class PetsService {
 
     static async getAllPets() {
         const pets = await PetRepository.find({
             relations: ["owner"],
-            order: { registrationDate: "DESC" }, //ordenar por fecha
+            order: { registrationDate: "DESC" },
         });
 
         // Mapeamos para devolver una respuesta más limpia
@@ -33,8 +32,7 @@ export class PetsService {
     }
 
     static async getPetById(idPet: number) {
-        const petRepo = AppDataSource.getRepository(Pet);
-        const pet = await petRepo.findOne({
+        const pet = await PetRepository.findOne({
             where: { idPet },
             relations: ["owner"],
         });
@@ -66,22 +64,25 @@ export class PetsService {
     }
     
     static async deletePetById(idPet: number): Promise<void> {
-        const petRepo = AppDataSource.getRepository(Pet);
 
-        const pet = await petRepo.findOne({ where: { idPet } });
+        const pet = await PetRepository.findOne({ where: { idPet } });
         if (!pet) {
             throw new Error("Pet not found");
         }
+        const dates = await AppointmentRepository.findByPet(idPet);
 
-        await petRepo.remove(pet); // elimina completamente el registro
+        if(dates.length > 0){
+            throw new Error("Cannot delete pet with existing appointments");
+        }
+
+        await PetRepository.remove(pet); // elimina completamente el registro
     }
 
 
 static async updatePetById(id: number, data: UpdatePetDto) {
-    const petRepo = AppDataSource.getRepository(Pet);
 
     // 🔍 Buscar la mascota existente
-    const pet = await petRepo.findOne({ where: { idPet: id } });
+    const pet = await PetRepository.findOne({ where: { idPet: id } });
     if (!pet) {
       throw new Error("Pet not found");
     }
@@ -92,7 +93,7 @@ static async updatePetById(id: number, data: UpdatePetDto) {
     if (data.status) pet.status = data.status;
 
     // 💾 Guardar cambios
-    const updatedPet = await petRepo.save(pet);
+    const updatedPet = await PetRepository.save(pet);
 
     return updatedPet;
   }

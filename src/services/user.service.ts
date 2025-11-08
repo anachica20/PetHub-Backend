@@ -1,8 +1,11 @@
-import { AppDataSource } from "../config/data-source.js";
 import { User } from "../entities/user.entity.js";
 import { Role } from "../entities/role.entity.js";
 import { UpdateUserDto } from "../interfaces/users.interface.js";
+import {UserRepository} from "../repositories/user.repository.js";
+
 import bcrypt from "bcrypt";
+import { AppDataSource } from "../config/data-source.js";
+import { AppointmentRepository } from "../repositories/appointments.repository.js";
 
 export class UserService {
 
@@ -17,33 +20,32 @@ export class UserService {
     password: string;
     roleId: number;
   }) {
-    const userRepo = AppDataSource.getRepository(User);
     const roleRepo = AppDataSource.getRepository(Role);
 
-    // 🧩 Verificar si ya existe el usuario
-    const existingUser = await userRepo.findOne({ where: { email } });
+    //Verificar si ya existe el usuario
+    const existingUser = await UserRepository.findOne({ where: { email } });
     if (existingUser) {
       throw new Error("El correo ya está registrado.");
     }
 
-    // 🧩 Buscar el rol
+    //Buscar el rol
     const role = await roleRepo.findOne({ where: { idRole: roleId } });
     if (!role) {
       throw new Error("El rol especificado no existe.");
     }
 
-    // 🔐 Encriptar la contraseña
+    //Encriptar la contraseña
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // 🧱 Crear el usuario
-    const newUser = userRepo.create({
+    //Crear el usuario
+    const newUser = UserRepository.create({
       fullName,
       email,
       passwordHash,
-      role, // ← Aquí pasas la entidad Role completa
+      role,
     });
 
-    await userRepo.save(newUser);
+    await UserRepository.save(newUser);
     return newUser;
   }
 
@@ -59,7 +61,7 @@ export class UserService {
   static async getAllUsers() {
     const userRepo = AppDataSource.getRepository(User);
     const users = await userRepo.find({
-      relations: ["role"], // incluir la relación con Role si aplica
+      relations: ["role"], 
     });
 
     if (!users || users.length === 0) {
@@ -70,14 +72,20 @@ export class UserService {
   }
 
   static async deleteUserById(id: number) {
-    const userRepo = AppDataSource.getRepository(User);
 
-    const user = await userRepo.findOne({ where: { idUser: id } });
+    const user = await UserRepository.findOne({ where: { idUser: id } });
     if (!user) {
-      return false; // No existe
+      return false;
     }
 
-    await userRepo.remove(user); // o delete({ idUser: id }) si prefieres
+    const appointmentsAsOwner = await AppointmentRepository.findByOwner(id);
+    const appointmentsAsVet = await AppointmentRepository.findByIdVet(id);
+
+    if(appointmentsAsOwner || appointmentsAsVet){
+      throw new Error("Cannot delete user with existing appointments");
+    }
+
+    await UserRepository.remove(user);
     return true;
   }
 
@@ -95,22 +103,20 @@ export class UserService {
       throw new Error("User not found");
     }
 
-    // 2️⃣ Actualizar nombre si se envía
+
     if (data.fullName) {
       user.fullName = data.fullName.trim();
     }
 
-    // 3️⃣ Actualizar rol si se envía
     if (data.roleId) {
       const newRole = await roleRepo.findOne({ where: { idRole: data.roleId } });
       if (!newRole) throw new Error("Role not found");
       user.role = newRole;
     }
 
-    // 4️⃣ Guardar cambios
+
     const savedUser = await userRepo.save(user);
 
-    // 5️⃣ Retornar un objeto limpio
     return {
       idUser: savedUser.idUser,
       fullName: savedUser.fullName,
